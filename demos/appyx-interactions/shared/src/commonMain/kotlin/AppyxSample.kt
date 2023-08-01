@@ -1,6 +1,7 @@
 import InteractionTarget.Element
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -70,24 +73,29 @@ internal fun AppyxSample(
             appyxComponent = appyxComponent,
             screenWidthPx = screenWidthPx,
             screenHeightPx = screenHeightPx,
-            modifier = Modifier.weight(0.9f).clipToBounds()
+            modifier = Modifier.weight(1f).clipToBounds().clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                actions.getValue("Push").invoke()
+            }
         ) { elementUiModel ->
             ModalUi(
                 elementUiModel = elementUiModel,
                 isChildMaxSize = childSize == ChildSize.MAX,
             )
         }
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.1f)
-                .padding(top = 8.dp),
-        ) {
-            actions.keys.forEachIndexed { _, key ->
-                Action(text = key, action = actions.getValue(key))
-            }
-        }
+//        Row(
+//            horizontalArrangement = Arrangement.SpaceEvenly,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .weight(0.1f)
+//                .padding(top = 8.dp),
+//        ) {
+//            actions.keys.forEachIndexed { _, key ->
+//                Action(text = key, action = actions.getValue(key))
+//            }
+//        }
     }
 }
 
@@ -113,6 +121,13 @@ internal fun ModalUi(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .then(
+                if (isChildMaxSize) {
+                    Modifier
+                } else {
+                    Modifier.clip(RoundedCornerShape(5))
+                }
+            )
             .then(elementUiModel.modifier)
             .background(
                 color = when (val target = elementUiModel.element.interactionTarget) {

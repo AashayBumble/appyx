@@ -9,6 +9,7 @@ import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.BackStackModel
 import com.bumble.appyx.components.backstack.operation.pop
 import com.bumble.appyx.components.backstack.operation.push
+import com.bumble.appyx.components.backstack.ui.modal.BackStackModal
 import com.bumble.appyx.components.backstack.ui.parallax.BackStackParallax
 import com.bumble.appyx.interactions.core.model.BaseAppyxComponent
 
@@ -30,8 +31,8 @@ internal fun BackStackParallaxSample(
         BackStack(
             scope = coroutineScope,
             model = model,
-            motionController = { BackStackParallax(it) },
-            gestureFactory = { BackStackParallax.Gestures(it) },
+            motionController = { BackStackModal(it) },
+            gestureFactory = { BackStackModal.Gestures(it) },
             animationSpec = spring(stiffness = Spring.StiffnessVeryLow),
         )
     val actions = mapOf(
@@ -43,7 +44,7 @@ internal fun BackStackParallaxSample(
         screenHeightPx = screenHeightPx,
         appyxComponent = backStack as BaseAppyxComponent<InteractionTarget, Any>,
         actions = actions,
-        childSize = ChildSize.MAX,
+        childSize = ChildSize.MEDIUM,
         modifier = modifier,
     )
 }

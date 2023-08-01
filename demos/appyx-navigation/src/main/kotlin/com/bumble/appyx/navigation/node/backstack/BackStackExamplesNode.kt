@@ -18,7 +18,8 @@ import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.BackStackModel
 import com.bumble.appyx.components.backstack.operation.push
 import com.bumble.appyx.components.backstack.ui.fader.BackStackFader
-import com.bumble.appyx.components.backstack.ui.parallax.BackStackParallax
+import com.bumble.appyx.components.backstack.ui.modal.BackStackModal
+import com.bumble.appyx.components.backstack.ui.parallax.BackstackParallax
 import com.bumble.appyx.components.backstack.ui.slider.BackStackSlider
 import com.bumble.appyx.components.backstack.ui.stack3d.BackStack3D
 import com.bumble.appyx.interactions.core.ui.gesture.GestureSettleConfig
@@ -64,6 +65,9 @@ class BackStackExamplesNode(
 
         @Parcelize
         object BackStack3D : InteractionTarget()
+
+        @Parcelize
+        object BackStackModal : InteractionTarget()
     }
 
     override fun resolve(interactionTarget: InteractionTarget, buildContext: BuildContext): Node =
@@ -83,9 +87,9 @@ class BackStackExamplesNode(
             })
             is InteractionTarget.BackstackParallax -> BackStackNode(
                 buildContext = buildContext,
-                motionController = { BackStackParallax(uiContext = it) },
-                gestureFactory = { BackStackParallax.Gestures(it) },
-                isMaxSize = true
+                motionController = { BackstackParallax(uiContext = it) },
+                gestureFactory = { BackstackParallax.Gestures(it) },
+                childSize = BackStackNode.ChildSize.MAX,
             ).also {
                 padding.value = 0
             }
@@ -95,6 +99,15 @@ class BackStackExamplesNode(
                 gestureFactory = { BackStack3D.Gestures(it) },
                 gestureSettleConfig = GestureSettleConfig(completionThreshold = 0.2f),
             )
+            is InteractionTarget.BackStackModal -> BackStackNode(
+                buildContext = buildContext,
+                motionController = { BackStackModal(it) },
+                gestureFactory = { BackStackModal.Gestures(it) },
+                childSize = BackStackNode.ChildSize.MAX_WIDTH,
+                gestureSettleConfig = GestureSettleConfig(completionThreshold = 0.2f),
+            ).also {
+                padding.value = 0
+            }
         }
 
     @Composable
@@ -122,6 +135,9 @@ class BackStackExamplesNode(
                 }
                 TextButton(text = "BackStack 3D") {
                     backStack.push(InteractionTarget.BackStack3D)
+                }
+                TextButton(text = "BackStack Modal") {
+                    backStack.push(InteractionTarget.BackStackModal)
                 }
             }
         }

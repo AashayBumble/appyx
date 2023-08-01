@@ -1,7 +1,11 @@
 package com.bumble.appyx.navigation.node.backstack
 
 import android.os.Parcelable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,7 +56,7 @@ class BackStackNode(
         GestureFactory.Noop()
     },
     gestureSettleConfig: GestureSettleConfig = GestureSettleConfig(),
-    private val isMaxSize: Boolean = false,
+    private val childSize: ChildSize = ChildSize.DEFAULT,
     private val backStack: BackStack<InteractionTarget> = BackStack(
         model = BackStackModel(
             initialTargets = listOf(InteractionTarget.Child(1)),
@@ -59,12 +64,18 @@ class BackStackNode(
         ),
         motionController = motionController,
         gestureFactory = gestureFactory,
+        animationSpec = spring(stiffness = Spring.StiffnessVeryLow),
         gestureSettleConfig = gestureSettleConfig,
     )
 ) : ParentNode<BackStackNode.InteractionTarget>(
     buildContext = buildContext,
     appyxComponent = backStack,
 ) {
+    enum class ChildSize {
+        DEFAULT,
+        MAX,
+        MAX_WIDTH,
+    }
     sealed class InteractionTarget : Parcelable {
         @Parcelize
         class Child(val index: Int) : InteractionTarget()
@@ -79,7 +90,7 @@ class BackStackNode(
                     modifier = Modifier
                         .fillMaxSize()
                         .then(
-                            if (isMaxSize) {
+                            if (childSize == ChildSize.MAX) {
                                 Modifier
                             } else {
                                 Modifier.clip(RoundedCornerShape(5))
@@ -88,6 +99,12 @@ class BackStackNode(
                         .background(backgroundColor)
                         .padding(24.dp)
                         .gestureModifier(backStack, interactionTarget.index.toString())
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ) {
+                            backStack.push(InteractionTarget.Child(Random.nextInt(20)))
+                        }
                 ) {
                     Text(
                         text = interactionTarget.index.toString(),
@@ -114,10 +131,10 @@ class BackStackNode(
                     .fillMaxSize()
                     .background(appyx_dark)
                     .then(
-                        if (isMaxSize) {
-                            Modifier.padding(bottom = 16.dp)
-                        } else {
-                            Modifier.padding(16.dp)
+                        when (childSize) {
+                            ChildSize.DEFAULT -> Modifier.padding(16.dp)
+                            ChildSize.MAX -> Modifier.padding(bottom = 16.dp)
+                            ChildSize.MAX_WIDTH -> Modifier
                         }
                     ),
             )
